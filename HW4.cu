@@ -1,4 +1,4 @@
-// Name:
+// Name: Alaina Odham
 // Vector addition on the GPU of any size with fixed block and grid size also adding pragma unroll for speed up.
 // nvcc HW4.cu -o temp
 /*
