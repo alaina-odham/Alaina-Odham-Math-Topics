@@ -61,8 +61,8 @@ int main()
 		printf("Texture Alignment: %ld\n", prop.textureAlignment);         //the alignment requirement to access things in the texture memory (memory address starts with a multiple of this number)
 		printf(" ---MP Information for device %d ---\n", i);
 		printf("Multiprocessor count : %d\n", prop.multiProcessorCount);   //Number of SMs (streaming multiprocessors) on the GPU
-		printf("Shared mem per mp: %ld\n", prop.sharedMemPerBlock);        //shared memory for a block
-		printf("Registers per mp: %d\n", prop.regsPerBlock);               //number of registers avaliable for the threads in a block to use, typically holds temporary variables
+		printf("Shared mem per block: %ld\n", prop.sharedMemPerBlock);     //shared memory for a block
+		printf("Registers per block: %d\n", prop.regsPerBlock);            //number of registers avaliable for the threads in a block to use, typically holds temporary variables
 		printf("Threads in warp: %d\n", prop.warpSize);                    //a warp breaks down a block into groups of threads, typically 32
 		printf("Max threads per block: %d\n", prop.maxThreadsPerBlock);                                                         //max threads per block
 		printf("Max thread dimensions: (%d, %d, %d)\n", prop.maxThreadsDim[0], prop.maxThreadsDim[1], prop.maxThreadsDim[2]);   //max dimensions a thread can have
@@ -93,7 +93,7 @@ int main()
         printf("Max registers per multiprocessor: %d\n", prop.regsPerMultiprocessor);                                //registers avaliable in one streaming multiprocessor
 
         //other missing info
-        printf("Warp shuffle instructions supported (cooperativeLaunch): %s\n", prop.cooperativeLaunch ? "Yes" : "No");  //allows blocks to communicate with each other
+        printf("cooperativeLaunch supported: %s\n", prop.cooperativeLaunch ? "Yes" : "No");                              //allows blocks to communicate with each other
         printf("Managed memory: %s\n", prop.managedMemory ? "Yes" : "No");                                               //if a managed memory accessible by both the CPU and GPU is supported
         printf("Concurrent managed access: %s\n", prop.concurrentManagedAccess ? "Yes" : "No");                          //if the managed memory can be accessed by the GPU and CPU at the same time
         printf("Can execute host callable device functions (canUseHostPointerForRegisteredMem): %s\n", prop.canUseHostPointerForRegisteredMem ? "Yes" : "No");
