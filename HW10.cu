@@ -34,7 +34,7 @@
 #include <stdio.h>
 
 // Defines
-#define N 4354649 // Length of the vector                                                            //edit N to test code, originally 100000
+#define N 435649 // Length of the vector                                                            //edit N to test code, originally 100000
 #define BLOCK_SIZE 1024 // Threads in a block                                                       //set to 1024,a power of 2, max of what most computers handle
                                                                                                     //set to an odd number to test if user warning works
 
