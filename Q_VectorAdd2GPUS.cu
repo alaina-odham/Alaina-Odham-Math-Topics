@@ -36,13 +36,13 @@
 
 // Global variables
 float *A_CPU, *B_CPU, *C_CPU; //CPU pointers
-float *A_GPU0, *B_GPU0, *C_GPU0; //GPU 1pointers
-float *A_GPU1, *B_GPU1, *C_GPU1; //GPU 2 pointers
+float *A_GPU0, *B_GPU0, *C_GPU0;                                                             //GPU 1 pointers
+float *A_GPU1, *B_GPU1, *C_GPU1;                                                             //GPU 2 pointers
 dim3 BlockSize; //This variable will hold the Dimensions of your blocks
 dim3 GridSize; //This variable will hold the Dimensions of your grid
 float Tolerance = 0.01;
 
-int midpoint = (N+1)/2;                                                                      //find midpoint, handle odd case
+int midpoint = (N+1)/2;                                                                      //find midpoint, handle odd case by adding one (ok because uses integer division)
 int secondhalf = N-midpoint;
 
 // Function prototypes
@@ -90,7 +90,7 @@ void allocateMemory()
 	B_CPU = (float*)malloc(N*sizeof(float));
 	C_CPU = (float*)malloc(N*sizeof(float));
 	
-	cudaSetDevice(0);                                                               //allocate memory for both GPU
+	cudaSetDevice(0);                                                               //allocate memory for both GPUs
 	// Device "GPU0" Memory
 	cudaMalloc(&A_GPU0, midpoint*sizeof(float));
 	cudaErrorCheck(__FILE__, __LINE__);
@@ -211,7 +211,7 @@ void CleanUp()
 
 int main()
 {
-	int count;                                                      //quit if there is not at least 2 GPUs
+	int count;                                                      //quit if there is not at least 2 GPUs (copied from HW5)
 	cudaGetDeviceCount(&count);
 	cudaErrorCheck(__FILE__, __LINE__);
 	printf(" You have %d GPUs in this machine\n", count);
@@ -253,52 +253,46 @@ int main()
 	cudaSetDevice(0);
 	cudaErrorCheck(__FILE__, __LINE__);
 	
-	// Copy Memory from CPU to GPU		
-	cudaMemcpyAsync(A_GPU0, A_CPU, midpoint*sizeof(float), cudaMemcpyHostToDevice);
+	cudaMemcpyAsync(A_GPU0, A_CPU, midpoint*sizeof(float), cudaMemcpyHostToDevice); //only copy first half of elements from CPU to GPU
 	cudaErrorCheck(__FILE__, __LINE__);
 	cudaMemcpyAsync(B_GPU0, B_CPU, midpoint*sizeof(float), cudaMemcpyHostToDevice);
 	cudaErrorCheck(__FILE__, __LINE__);
 
-	dim3 GridSize0;
+	dim3 GridSize0;                                                                 //reduce gridsize to only work on first half
 	GridSize0.x = (midpoint - 1)/BlockSize.x + 1;
 	GridSize0.y = 1;
 	GridSize0.z = 1;
 	
-	addVectorsGPU<<<GridSize0,BlockSize>>>(A_GPU0, B_GPU0, C_GPU0, midpoint);
+	addVectorsGPU<<<GridSize0,BlockSize>>>(A_GPU0, B_GPU0, C_GPU0, midpoint);       //call function for first half
 	cudaErrorCheck(__FILE__, __LINE__);
 	
-	// Copy Memory from GPU to CPU	
-	cudaMemcpyAsync(C_CPU, C_GPU0, midpoint*sizeof(float), cudaMemcpyDeviceToHost);
+	cudaMemcpyAsync(C_CPU, C_GPU0, midpoint*sizeof(float), cudaMemcpyDeviceToHost); //copy first half from GPU to CPU
 	cudaErrorCheck(__FILE__, __LINE__);
 	
-	// Making sure the GPU and CPU wiat until each other are at the same place.
-	cudaDeviceSynchronize();
+	cudaDeviceSynchronize();                                                        //wait until done
 	cudaErrorCheck(__FILE__, __LINE__);
 
 	//GPU 2
 	cudaSetDevice(1);
 	cudaErrorCheck(__FILE__, __LINE__);
-	
-	// Copy Memory from CPU to GPU		
-	cudaMemcpyAsync(A_GPU1, A_CPU + midpoint, secondhalf*sizeof(float), cudaMemcpyHostToDevice);
+		
+	cudaMemcpyAsync(A_GPU1, A_CPU + midpoint, secondhalf*sizeof(float), cudaMemcpyHostToDevice);   //only copy second half of elements from CPU to GPU
 	cudaErrorCheck(__FILE__, __LINE__);
 	cudaMemcpyAsync(B_GPU1, B_CPU + midpoint, secondhalf*sizeof(float), cudaMemcpyHostToDevice);
 	cudaErrorCheck(__FILE__, __LINE__);
 	
-	dim3 GridSize1;
+	dim3 GridSize1;                                                                                //reduce gridsize to only work on second half
 	GridSize1.x = (secondhalf - 1)/BlockSize.x + 1;
 	GridSize1.y = 1;
 	GridSize1.z = 1;
 
-	addVectorsGPU<<<GridSize1,BlockSize>>>(A_GPU1, B_GPU1, C_GPU1, secondhalf);
+	addVectorsGPU<<<GridSize1,BlockSize>>>(A_GPU1, B_GPU1, C_GPU1, secondhalf);                    //call function for second half
 	cudaErrorCheck(__FILE__, __LINE__);
 	
-	// Copy Memory from GPU to CPU	
-	cudaMemcpyAsync(C_CPU + midpoint, C_GPU1, secondhalf*sizeof(float), cudaMemcpyDeviceToHost);
+	cudaMemcpyAsync(C_CPU + midpoint, C_GPU1, secondhalf*sizeof(float), cudaMemcpyDeviceToHost);   //copy second half from GPU to CPU
 	cudaErrorCheck(__FILE__, __LINE__);
 	
-	// Making sure the GPU and CPU wiat until each other are at the same place.
-	cudaDeviceSynchronize();
+	cudaDeviceSynchronize();                                                                       //wait until done
 	cudaErrorCheck(__FILE__, __LINE__);
 	
 	gettimeofday(&end, NULL);
