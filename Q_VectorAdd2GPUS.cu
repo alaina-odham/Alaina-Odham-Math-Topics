@@ -245,13 +245,13 @@ int main()
 	{ 
 		C_CPU[id] = 0.0;
 	}
-	
-	//GPU 1
-	cudaSetDevice(0);
-	cudaErrorCheck(__FILE__, __LINE__);
 
 	// Adding on the GPU
 	gettimeofday(&start, NULL);
+
+	//GPU 1
+	cudaSetDevice(0);
+	cudaErrorCheck(__FILE__, __LINE__);
 	
 	// Copy Memory from CPU to GPU		
 	cudaMemcpyAsync(A_GPU0, A_CPU, midpoint*sizeof(float), cudaMemcpyHostToDevice);
@@ -274,28 +274,10 @@ int main()
 	// Making sure the GPU and CPU wiat until each other are at the same place.
 	cudaDeviceSynchronize();
 	cudaErrorCheck(__FILE__, __LINE__);
-	
-	gettimeofday(&end, NULL);
-	timeGPU = elaspedTime(start, end);
-	
-	// Checking to see if all went correctly.
-	if(check(C_CPU, N, Tolerance) == false)
-	{
-		printf("\n\n Something went wrong in the GPU vector addition\n");
-	}
-	else
-	{
-		printf("\n\n You added the two vectors correctly on the GPU");
-		printf("\n The time it took on the CPU was %ld microseconds", timeCPU);
-		printf("\n The time it took on the GPU was %ld microseconds", timeGPU);
-	}
 
 	//GPU 2
 	cudaSetDevice(1);
 	cudaErrorCheck(__FILE__, __LINE__);
-
-	// Adding on the GPU
-	gettimeofday(&start, NULL);
 	
 	// Copy Memory from CPU to GPU		
 	cudaMemcpyAsync(A_GPU1, A_CPU + midpoint, secondhalf*sizeof(float), cudaMemcpyHostToDevice);
